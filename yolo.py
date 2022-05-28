@@ -17,7 +17,7 @@ net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 npy.random.seed(42)
 colours = npy.random.randint(0, 255, size=(len(class_names), 3),dtype="uint8")
 
-def yolo_detector(img_path ,j):
+def yolo_detector(img_path):
 
     abs_path = './test/overall/'+img_path
     image = cv2.imread(abs_path)
@@ -38,7 +38,7 @@ def yolo_detector(img_path ,j):
             s1 = det[5:]
             classID = npy.argmax(s1)
             confidence = s1[classID]
-            if confidence > 0.5:
+            if confidence > 0.7:
                 box = det[0:4] * npy.array([W, H, W, H])
                 (cX, cY, w1, h1) = box.astype("int")
                 x = int(cX - (w1 / 2))
@@ -50,19 +50,24 @@ def yolo_detector(img_path ,j):
     
     if len(id1) > 0:
         for i in id1.flatten():
+            j=0
             (x, y) = (box1[i][0], box1[i][1])
             (w, h) = (box1[i][2], box1[i][3])
             cl = [int(c) for c in colours[classID1[i]]]
             text = "{}".format(class_names[classID1[i]])
-            if text == "truck" or text == "car":
+            if text == "truck":
                 area=w*h
                 cv2.rectangle(image, (x-2, y-2), (x + w + 2, y + h + 2), cl, 2)
-                cv2.putText(image, text +", "+str(x)+" "+(str(y)), (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, cl, 2)
+                cv2.putText(image, text +" , "+str("{:.2f}".format(confidence1[i])) , (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, cl, 2)
                 cv2.imwrite("test/detected/d{}.jpg".format(i),image)
                 if area>100:
                     im_refined = cv2.imread("test/detected/d{}.jpg".format(i))
                     crop = im_refined[int(y):int(y+h),int(x):int(x+w)]
                     if(crop.size != 0):
-                        cv2.imwrite("test/crops/d_{}c{}.jpg".format(i,j),crop)
+                        j=j+1
+                        cv2.imwrite("test/crops/d{}_c{}.jpg".format(i,j),crop)
+                        f = open("test/crops/d{}_c{}.txt".format(i,j),"w+")
+                        f.write(str(x) +" "+ str(y) +" "+ str(w) +" "+str(h))
+                        f.close()
                         print("Detecting vehicles...")
                 

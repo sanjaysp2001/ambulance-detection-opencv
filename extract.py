@@ -11,7 +11,7 @@ def extract_frames(video_path):
             print("Frame Saved")
         return hasFrames 
     sec = 0 
-    frameRate = 2
+    frameRate = 1
     success = getFrame(sec) 
     while success: 
         sec = sec + frameRate 

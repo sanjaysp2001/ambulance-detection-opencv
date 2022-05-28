@@ -1,5 +1,6 @@
 import os
 import glob
+import cv2
 import sys
 import playsound
 from detect import predict_image
@@ -17,8 +18,7 @@ if(os.path.exists(video_path)):
     for frame in os.listdir('./test/overall/'):
         if(frame.endswith('.jpg')):
             print(frame)
-            j=j+1
-            yolo_detector(frame,j)
+            yolo_detector(frame)
             for img in os.listdir('./test/crops/'):
                 if(img.endswith('.jpg')):
                     if(predict_image(img) == 1):
@@ -31,13 +31,24 @@ if(os.path.exists(video_path)):
     if(alarm == 1):
         print("----------------------------\n"+result+"\n----------------------------") 
         playsound.playsound(sound_path+'\\alarm.wav')
-        play_vid()
 
+        #The detected images are displayed with the position of ambulances
+        final_images = glob.glob('./test/final/*.jpg')
+        for img in final_images:
+            i = cv2.imread(img)
+            cv2.imshow("Detected",i)
+            cv2.waitKey(2000)
+
+        #Play the simulation of changing the traffic lights    
+        play_vid() 
     else:
+        #If no ambulance is detecte, then just a message will be displayed
         print("----------------------------\n"+result+"\n----------------------------") 
+        playsound.playsound(sound_path+'\\alarm.wav')
+
 
     delete_detected = glob.glob('./test/detected/*.jpg')
-    delete_crops = glob.glob('./test/crops/*.jpg')
+    delete_crops = glob.glob('./test/crops/*')
     delete_overall = glob.glob('./test/overall/*.jpg')
     for i in delete_detected:
         os.remove(i)
